@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IS–LM Model — Interactive Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #1d4ed8;
+  --red:    #b91c1c;
+  --green:  #15803d;
+  --border: #e2e8f0;
+  --bg:     #f8fafc;
+  --text:   #0f172a;
+  --muted:  #64748b;
+  --serif:  'Lora', Georgia, serif;
+  --sans:   'DM Sans', system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--sans);
+  background: #fff;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 1rem 0.75rem 1.5rem;
+}
+
+.hd { margin-bottom: 1.25rem; padding-bottom: .75rem; border-bottom: 1.5px solid var(--border); }
+.hd h1 { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; letter-spacing: -.01em; }
+.hd p { font-size: .8rem; color: var(--muted); margin-top: 5px; line-height: 1.65; font-style: normal; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.ctrl { display: flex; flex-direction: column; gap: .7rem; }
+
+.sec { font-size: .625rem; font-weight: 500; text-transform: uppercase; letter-spacing: .09em; color: #94a3b8; }
+
+.pg { display: flex; flex-direction: column; gap: 3px; }
+.pr { display: flex; justify-content: space-between; align-items: baseline; }
+.pn { font-size: 13px; font-style: italic; font-weight: 500; }
+.pd { font-size: 11px; color: var(--muted); font-style: normal; margin-left: 3px; }
+.pv { font-size: 13px; font-weight: 500; min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 3px;
+  background: var(--border); border-radius: 2px;
+  outline: none; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--blue); cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--blue); cursor: pointer;
+}
+
+.div { height: 1px; background: var(--border); }
+
+.ss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.ssc { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 5px 9px; }
+.ssc .sl { font-size: 10px; color: var(--muted); }
+.ssc .sv { font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.mul-note { font-size: 11px; color: var(--muted); line-height: 1.55; margin-top: 5px; }
+
+.chart-col { display: flex; flex-direction: column; gap: .75rem; }
+.chart-wrap { position: relative; width: 100%; height: 390px; }
+
+.leg { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: var(--muted); }
+.li  { display: flex; align-items: center; gap: 5px; }
+.ll  { width: 20px; height: 2.5px; border-radius: 1.5px; flex-shrink: 0; }
+.lld { width: 20px; height: 0; border-top: 2px dashed; flex-shrink: 0; }
+
+.foot {
+  margin-top: 1.25rem; padding-top: .75rem; border-top: 1px solid var(--border);
+  font-size: 10.5px; color: #94a3b8; font-style: italic;
+  display: flex; justify-content: space-between; align-items: baseline;
+  flex-wrap: wrap; gap: .5rem;
+}
+
+@media (max-width: 620px) {
+  .grid { grid-template-columns: 1fr; }
+  .chart-wrap { height: 280px; }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <div class="hd">
+    <h1>IS–LM Model</h1>
+    <p>
+      The IS–LM model describes short-run equilibrium in the goods and money markets.
+      The downward-sloping <strong>IS curve</strong> shows combinations of output <i>Y</i> and interest rate
+      <i>r</i> that clear the goods market (investment equals saving).
+      The upward-sloping <strong>LM curve</strong> shows combinations that clear the money market
+      (money demand equals real money supply <i>M/P</i>).
+      Their intersection determines equilibrium <i>Y*</i> and <i>r*</i>.
+      Use the sliders to run fiscal policy experiments (shift IS via <i>G</i> or <i>t</i>)
+      and monetary policy experiments (shift LM via <i>M/P</i>).
+      Dashed curves show the baseline for comparison.
+    </p>
+  </div>
+
+  <div class="grid">
+
+    <!-- ── Left: Controls ── -->
+    <div class="ctrl">
+
+      <div class="sec">Policy Variables</div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">G <span class="pd">gov. spending</span></span>
+          <span class="pv" id="vG">300</span>
+        </div>
+        <input type="range" min="50" max="600" step="10" value="300" id="slG">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">t <span class="pd">income tax rate</span></span>
+          <span class="pv" id="vt">0.25</span>
+        </div>
+        <input type="range" min="0.05" max="0.45" step="0.01" value="0.25" id="slt">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">M/P <span class="pd">real money supply</span></span>
+          <span class="pv" id="vMP">200</span>
+        </div>
+        <input type="range" min="50" max="400" step="10" value="200" id="slMP">
+      </div>
+
+      <div class="div"></div>
+      <div class="sec">Structural Parameters</div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">b <span class="pd">MPC</span></span>
+          <span class="pv" id="vb">0.80</span>
+        </div>
+        <input type="range" min="0.50" max="0.95" step="0.01" value="0.80" id="slb">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">d <span class="pd">invest. sensitivity to r</span></span>
+          <span class="pv" id="vd">40</span>
+        </div>
+        <input type="range" min="5" max="80" step="5" value="40" id="sld">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">e <span class="pd">money income sensitivity</span></span>
+          <span class="pv" id="ve">0.50</span>
+        </div>
+        <input type="range" min="0.10" max="0.90" step="0.05" value="0.50" id="sle">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">f <span class="pd">money interest sensitivity</span></span>
+          <span class="pv" id="vf">50</span>
+        </div>
+        <input type="range" min="10" max="100" step="5" value="50" id="slf">
+      </div>
+
+      <div class="div"></div>
+      <div class="sec" style="margin-bottom:5px">Equilibrium</div>
+
+      <div class="ss-grid">
+        <div class="ssc">
+          <div class="sl">Y* — output</div>
+          <div class="sv" id="ssY">—</div>
+        </div>
+        <div class="ssc">
+          <div class="sl">r* — interest rate</div>
+          <div class="sv" id="ssr">—</div>
+        </div>
+        <div class="ssc">
+          <div class="sl">IS–LM mult. &Delta;Y/&Delta;G</div>
+          <div class="sv" id="ssmul">—</div>
+        </div>
+        <div class="ssc">
+          <div class="sl">Keynesian mult.</div>
+          <div class="sv" id="sssim">—</div>
+        </div>
+      </div>
+      <div class="mul-note" id="mulnote"></div>
+
+    </div>
+
+    <!-- ── Right: Chart ── -->
+    <div class="chart-col">
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="leg">
+        <div class="li"><div class="ll" style="background:#1d4ed8"></div><span>IS — goods market</span></div>
+        <div class="li"><div class="ll" style="background:#b91c1c"></div><span>LM — money market</span></div>
+        <div class="li"><div class="lld" style="border-color:#bfdbfe"></div><span>Baseline IS</span></div>
+        <div class="li"><div class="lld" style="border-color:#fecaca"></div><span>Baseline LM</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <span>Hicks (1937) · IS–LM framework · Fixed price level assumed · IS: <i>r</i> = (<i>a</i>+<i>Ī</i>+<i>G</i>)/<i>d</i> &minus; [1&minus;<i>b</i>(1&minus;<i>t</i>)]/<i>d</i> &middot; <i>Y</i> &nbsp;|&nbsp; LM: <i>r</i> = (<i>e</i>/<i>f</i>)<i>Y</i> &minus; (<i>M/P</i>)/<i>f</i></span>
+    <span>Created by <a href="https://sites.google.com/view/abramov-vladislav/home" style="color:#1d4ed8;text-decoration:none;font-style:normal" target="_blank">Vladislav Abramov</a>, Texas A&amp;M University.</span>
+  </div>
+
+</div>
+
+<script>
+/* ── Fixed autonomous components ── */
+const a_ = 100, Ib = 200;
+
+/* ── Baseline defaults ── */
+const G0=300, t0=0.25, b0=0.80, d0=40, MP0=200, e0=0.50, f0=50;
+
+/* ── Mutable state ── */
+let G=300, t=0.25, b=0.80, d=40, MP=200, e=0.50, f=50;
+
+/* ── Model equations ── */
+function isR(Y_, G_, t_, b_, d_) {
+  const A = a_ + Ib + G_;
+  return A/d_ - (1 - b_*(1-t_))/d_ * Y_;
+}
+
+function lmR(Y_, MP_, e_, f_) {
+  return e_/f_ * Y_ - MP_/f_;
+}
+
+function equilibrium(G_, t_, b_, d_, MP_, e_, f_) {
+  const A     = a_ + Ib + G_;
+  const alpha = 1 - b_*(1-t_);
+  const denom = alpha/d_ + e_/f_;
+  const Y     = (A/d_ + MP_/f_) / denom;
+  const r     = e_/f_ * Y - MP_/f_;
+  const mulIS = 1 / (alpha + (e_/f_)*d_);  /* IS-LM fiscal multiplier */
+  const mulK  = 1 / alpha;                  /* Simple Keynesian multiplier */
+  return { Y, r, mulIS, mulK };
+}
+
+function chartRange(G_, t_, b_, d_, MP_, e_, f_, Y_) {
+  const A     = a_ + Ib + G_;
+  const alpha = 1 - b_*(1-t_);
+  const YIS0  = alpha > 0.005 ? A/alpha : 3000;
+  const xMax  = Math.min(Math.max(YIS0, Y_) * 1.25, 3000);
+  const rAtX  = lmR(xMax, MP_, e_, f_);
+  const rIS0  = A/d_;
+  const yMax  = Math.max(rIS0, rAtX, 2) * 1.25;
+  return { xMax: Math.ceil(xMax/50)*50, yMax: Math.ceil(yMax) };
+}
+
+function buildIS(G_, t_, b_, d_, xMax, N=300) {
+  const pts = [];
+  for (let i=0; i<=N; i++) {
+    const Y = i * xMax / N;
+    const r = isR(Y, G_, t_, b_, d_);
+    if (r >= 0) pts.push({ x:Y, y:r });
+  }
+  return pts;
+}
+
+function buildLM(MP_, e_, f_, xMax, N=300) {
+  const pts = [];
+  for (let i=0; i<=N; i++) {
+    const Y = i * xMax / N;
+    const r = lmR(Y, MP_, e_, f_);
+    if (r >= 0) pts.push({ x:Y, y:r });
+  }
+  return pts;
+}
+
+/* ── Annotation plugin ── */
+const annotPlugin = {
+  id: 'islm',
+  afterDraw(chart) {
+    const { Yeq, req } = chart._eq || {};
+    if (Yeq == null) return;
+
+    const { ctx,
+            chartArea: { left, right, top, bottom },
+            scales: { x: sx, y: sy },
+            options: { scales: { x: { max: xMax }, y: { max: yMax } } }
+          } = chart;
+
+    const xPx = sx.getPixelForValue(Yeq);
+    const yPx = sy.getPixelForValue(req);
+
+    /* Baseline equilibrium reference point */
+    const { Y: Yb, r: rb } = equilibrium(G0,t0,b0,d0,MP0,e0,f0);
+    const xPx0 = sx.getPixelForValue(Yb);
+    const yPx0 = sy.getPixelForValue(rb);
+
+    ctx.save();
+
+    /* Baseline dot (hollow gray circle) */
+    if (xPx0 >= left && xPx0 <= right && yPx0 >= top && yPx0 <= bottom) {
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
+      ctx.fillStyle   = '#fff';
+      ctx.beginPath(); ctx.arc(xPx0, yPx0, 4, 0, 2*Math.PI);
+      ctx.fill(); ctx.stroke();
+    }
+
+    /* Dashed green lines to current equilibrium */
+    const inBounds = xPx >= left && xPx <= right && yPx >= top && yPx <= bottom;
+    if (inBounds) {
+      ctx.setLineDash([5,4]); ctx.strokeStyle = '#15803d'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(xPx, bottom); ctx.lineTo(xPx, yPx); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(left,  yPx);  ctx.lineTo(xPx, yPx); ctx.stroke();
+      ctx.setLineDash([]);
+
+      /* Current equilibrium dot */
+      ctx.fillStyle   = '#15803d';
+      ctx.beginPath(); ctx.arc(xPx, yPx, 5.5, 0, 2*Math.PI); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.setLineDash([]);
+
+      /* Y* label */
+      ctx.fillStyle     = '#15803d';
+      ctx.font          = '500 11px DM Sans, sans-serif';
+      ctx.textAlign     = 'center';
+      ctx.textBaseline  = 'bottom';
+      ctx.fillText('Y*', xPx, bottom - 3);
+
+      /* r* label */
+      ctx.textAlign    = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('r*', left - 4, yPx);
+    }
+
+    /* IS and LM curve labels (at 78% of xMax) */
+    const xL   = 0.78 * xMax;
+    const xLpx = sx.getPixelForValue(xL);
+    const rIS  = isR(xL, G, t, b, d);
+    const rLM  = lmR(xL, MP, e, f);
+
+    if (rIS >= 0 && rIS <= yMax) {
+      ctx.fillStyle    = '#1d4ed8';
+      ctx.font         = '600 12px DM Sans, sans-serif';
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('IS', xLpx + 4, sy.getPixelForValue(rIS) - 3);
+    }
+    if (rLM >= 0 && rLM <= yMax) {
+      ctx.fillStyle    = '#b91c1c';
+      ctx.font         = '600 12px DM Sans, sans-serif';
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('LM', xLpx + 4, sy.getPixelForValue(rLM) + 3);
+    }
+
+    ctx.restore();
+  }
+};
+
+/* ── Initialize chart ── */
+const { Y: Yeq0, r: req0 } = equilibrium(G,t,b,d,MP,e,f);
+const { xMax: xM0, yMax: yM0 } = chartRange(G,t,b,d,MP,e,f,Yeq0);
+
+const isDk = matchMedia('(prefers-color-scheme:dark)').matches;
+const gc   = isDk ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+const tc   = isDk ? '#999' : '#64748b';
+
+const chart = new Chart(document.getElementById('chart'), {
+  type: 'scatter',
+  plugins: [annotPlugin],
+  data: {
+    datasets: [
+      /* 0 – baseline IS */ { data: buildIS(G0,t0,b0,d0,xM0), showLine:true, borderColor:'#bfdbfe', borderDash:[7,4], borderWidth:1.5, pointRadius:0, fill:false },
+      /* 1 – baseline LM */ { data: buildLM(MP0,e0,f0,xM0),  showLine:true, borderColor:'#fecaca', borderDash:[7,4], borderWidth:1.5, pointRadius:0, fill:false },
+      /* 2 – current IS  */ { data: buildIS(G,t,b,d,xM0),    showLine:true, borderColor:'#1d4ed8', borderWidth:2.5, pointRadius:0, fill:false },
+      /* 3 – current LM  */ { data: buildLM(MP,e,f,xM0),     showLine:true, borderColor:'#b91c1c', borderWidth:2.5, pointRadius:0, fill:false },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    animation: { duration: 180 },
+    plugins: { legend:{ display:false }, tooltip:{ enabled:false } },
+    scales: {
+      x: {
+        type: 'linear', min: 0, max: xM0,
+        title: { display:true, text:'Y  (output / income)', font:{ size:12, style:'italic' }, color:'#374151', padding:{ top:6 } },
+        ticks: { maxTicksLimit:7, color:tc }, grid:{ color:gc }
+      },
+      y: {
+        type: 'linear', min: 0, max: yM0,
+        title: { display:true, text:'r  (interest rate)', font:{ size:12, style:'italic' }, color:'#374151', padding:{ bottom:6 } },
+        ticks: { maxTicksLimit:6, color:tc }, grid:{ color:gc }
+      }
+    }
+  }
+});
+chart._eq = { Yeq: Yeq0, req: req0 };
+
+/* ── Stats panel ── */
+function updStats() {
+  const { Y, r, mulIS, mulK } = equilibrium(G,t,b,d,MP,e,f);
+  document.getElementById('ssY').textContent   = isFinite(Y) ? Y.toFixed(0) : '∞';
+  document.getElementById('ssr').textContent   = isFinite(r) ? r.toFixed(2) : '—';
+  document.getElementById('ssmul').textContent = isFinite(mulIS) ? mulIS.toFixed(2) : '—';
+  document.getElementById('sssim').textContent = isFinite(mulK)  ? mulK.toFixed(2)  : '—';
+
+  const co = ((mulK - mulIS) / mulK * 100);
+  document.getElementById('mulnote').innerHTML = isFinite(co) && co > 1
+    ? `Raising <i>G</i> shifts IS right, pushing <i>r</i> up and crowding out private investment.
+       The IS–LM multiplier (${mulIS.toFixed(2)}) is <b>${co.toFixed(0)}%</b> below the simple Keynesian multiplier (${mulK.toFixed(2)}).`
+    : `Investment or money demand is insensitive to <i>r</i>: no crowding out occurs and both multipliers are equal.`;
+}
+
+/* ── Main update function ── */
+function update() {
+  G  = +document.getElementById('slG').value;
+  t  = +document.getElementById('slt').value;
+  b  = +document.getElementById('slb').value;
+  d  = +document.getElementById('sld').value;
+  MP = +document.getElementById('slMP').value;
+  e  = +document.getElementById('sle').value;
+  f  = +document.getElementById('slf').value;
+
+  document.getElementById('vG').textContent  = G;
+  document.getElementById('vt').textContent  = t.toFixed(2);
+  document.getElementById('vb').textContent  = b.toFixed(2);
+  document.getElementById('vd').textContent  = d;
+  document.getElementById('vMP').textContent = MP;
+  document.getElementById('ve').textContent  = e.toFixed(2);
+  document.getElementById('vf').textContent  = f;
+
+  const { Y, r } = equilibrium(G,t,b,d,MP,e,f);
+  const { xMax, yMax } = chartRange(G,t,b,d,MP,e,f,Y);
+
+  chart.data.datasets[0].data = buildIS(G0,t0,b0,d0,xMax);
+  chart.data.datasets[1].data = buildLM(MP0,e0,f0,xMax);
+  chart.data.datasets[2].data = buildIS(G,t,b,d,xMax);
+  chart.data.datasets[3].data = buildLM(MP,e,f,xMax);
+  chart.options.scales.x.max  = xMax;
+  chart.options.scales.y.max  = yMax;
+  chart._eq = { Yeq: Y, req: r };
+  chart.update();
+
+  updStats();
+}
+
+/* ── Attach slider listeners ── */
+['slG','slt','slb','sld','slMP','sle','slf'].forEach(id =>
+  document.getElementById(id).addEventListener('input', update)
+);
+
+/* ── Initialize stats ── */
+updStats();
+</script>
+</body>
+</html>
