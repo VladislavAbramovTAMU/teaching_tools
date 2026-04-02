@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solow Growth Model — Interactive Phase Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #1d4ed8;
+  --red:    #b91c1c;
+  --green:  #15803d;
+  --slate:  #64748b;
+  --border: #e2e8f0;
+  --bg:     #f8fafc;
+  --text:   #0f172a;
+  --muted:  #64748b;
+  --serif:  'Lora', Georgia, serif;
+  --sans:   'DM Sans', system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--sans);
+  background: #fff;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem 2.5rem;
+}
+
+/* Header */
+.hd { margin-bottom: 1.5rem; padding-bottom: .875rem; border-bottom: 1.5px solid var(--border); }
+.hd h1 { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; letter-spacing: -.01em; color: var(--text); }
+.hd p  { font-size: .8125rem; color: var(--muted); margin-top: 3px; font-style: italic; }
+
+/* Two-column layout */
+.grid {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  gap: 2.25rem;
+  align-items: start;
+}
+
+/* Controls panel */
+.ctrl { display: flex; flex-direction: column; gap: .9rem; }
+
+.sec {
+  font-family: var(--sans);
+  font-size: .625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #94a3b8;
+}
+
+.pg { display: flex; flex-direction: column; gap: 4px; }
+.pr {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px;
+}
+.pn { font-size: 13.5px; font-style: italic; font-weight: 500; color: var(--text); }
+.pd { font-size: 11px; color: var(--muted); font-style: normal; margin-left: 4px; }
+.pv { font-size: 13px; font-weight: 500; color: var(--text); min-width: 42px; text-align: right; font-variant-numeric: tabular-nums; }
+
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 3px;
+  background: var(--border); border-radius: 2px;
+  outline: none; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--blue);
+  box-shadow: 0 0 0 0px var(--blue);
+  cursor: pointer; transition: box-shadow .15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 3px #dbeafe; }
+input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--blue); cursor: pointer;
+}
+
+.div { height: 1px; background: var(--border); }
+
+/* Steady-state cards */
+.ss-title { margin-bottom: .5rem; }
+.ss-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ssc {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 7px; padding: 5px 10px;
+}
+.ssc .sl { font-size: 10px; color: var(--muted); }
+.ssc .sv { font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.gr-note {
+  font-size: 11px; color: var(--muted);
+  line-height: 1.55; margin-top: 7px;
+}
+.bdg {
+  display: inline-block; padding: 1px 7px;
+  border-radius: 4px; font-size: 10px; font-weight: 500;
+  line-height: 1.65; font-style: normal;
+}
+.bdg-ov { background: #fef9c3; color: #78350f; }
+.bdg-un { background: #dcfce7; color: #14532d; }
+.bdg-at { background: #dbeafe; color: #1e3a8a; }
+
+/* Chart side */
+.chart-col  { display: flex; flex-direction: column; gap: .75rem; }
+.chart-wrap { position: relative; width: 100%; height: 370px; }
+
+/* Legend */
+.leg { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: var(--muted); }
+.li  { display: flex; align-items: center; gap: 6px; }
+.ll  { width: 22px; height: 2.5px; border-radius: 1.5px; flex-shrink: 0; }
+.lld { width: 22px; height: 0; border-top: 2.5px dashed; flex-shrink: 0; }
+
+/* Footer */
+.foot {
+  margin-top: 1.5rem; padding-top: .75rem; border-top: 1px solid var(--border);
+  font-size: 10.5px; color: #94a3b8; font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; gap: 1.5rem; }
+  .chart-wrap { height: 270px; }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <div class="hd">
+    <h1>Solow Growth Model — Phase Diagram</h1>
+    <p>Per effective worker &middot; Cobb–Douglas production: f(k) = k<sup>&alpha;</sup> &middot; adjust parameters with the sliders</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- ── Left: Controls ── -->
+    <div class="ctrl">
+
+      <div class="sec">Parameters</div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">s <span class="pd">savings rate</span></span>
+          <span class="pv" id="vs">0.30</span>
+        </div>
+        <input type="range" min="0.01" max="0.70" step="0.01" value="0.30" id="sls">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">&alpha; <span class="pd">capital share</span></span>
+          <span class="pv" id="va">0.33</span>
+        </div>
+        <input type="range" min="0.10" max="0.70" step="0.01" value="0.33" id="sla">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">&delta; <span class="pd">depreciation</span></span>
+          <span class="pv" id="vd">0.05</span>
+        </div>
+        <input type="range" min="0.01" max="0.20" step="0.01" value="0.05" id="sld">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">n <span class="pd">pop. growth</span></span>
+          <span class="pv" id="vn">0.020</span>
+        </div>
+        <input type="range" min="0.00" max="0.10" step="0.005" value="0.02" id="sln">
+      </div>
+
+      <div class="pg">
+        <div class="pr">
+          <span class="pn">g <span class="pd">tech. progress</span></span>
+          <span class="pv" id="vg">0.020</span>
+        </div>
+        <input type="range" min="0.00" max="0.10" step="0.005" value="0.02" id="slg">
+      </div>
+
+      <div class="div"></div>
+
+      <!-- Steady-state values -->
+      <div>
+        <div class="sec ss-title">Steady State</div>
+        <div class="ss-grid">
+          <div class="ssc">
+            <div class="sl">k* (capital)</div>
+            <div class="sv" id="ssk">—</div>
+          </div>
+          <div class="ssc">
+            <div class="sl">y* = f(k*)</div>
+            <div class="sv" id="ssy">—</div>
+          </div>
+          <div class="ssc">
+            <div class="sl">c* = (1&minus;s)y*</div>
+            <div class="sv" id="ssvc">—</div>
+          </div>
+          <div class="ssc">
+            <div class="sl">&delta; + n + g</div>
+            <div class="sv" id="ssdng">—</div>
+          </div>
+        </div>
+        <div class="gr-note" id="grnote"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Right: Chart ── -->
+    <div class="chart-col">
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="leg">
+        <div class="li"><div class="ll" style="background:#94a3b8"></div><span>f(k) — production function</span></div>
+        <div class="li"><div class="ll" style="background:#1d4ed8"></div><span>sf(k) — actual investment</span></div>
+        <div class="li"><div class="ll" style="background:#b91c1c"></div><span>(&delta;+n+g)k — break-even investment</span></div>
+        <div class="li"><div class="lld" style="border-color:#15803d"></div><span>k* — steady state</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    Solow (1956) &middot; Assumes Cobb–Douglas f(k) = k<sup>&alpha;</sup> per effective worker.
+    Golden rule: for Cobb–Douglas, the consumption-maximizing savings rate is s<sub>GR</sub> = &alpha;.
+  </div>
+
+</div>
+
+<script>
+/* ─── State ─── */
+let s=.30, al=.33, dv=.05, n=.02, g=.02;
+
+/* ─── Compute steady state ─── */
+function ss() {
+  const dng  = dv + n + g;
+  const kstar = Math.pow(s / dng, 1 / (1 - al));
+  const ystar = Math.pow(kstar, al);
+  const cstar = (1 - s) * ystar;
+  return { kstar, ystar, cstar, dng };
+}
+
+/* ─── Dataset generation ─── */
+function mkData(kMax, N=300) {
+  const fk=[], sfk=[], bev=[];
+  for (let i=1; i<=N; i++) {
+    const k = i * kMax / N;
+    fk.push ({x:k, y:Math.pow(k,al)});
+    sfk.push({x:k, y:s*Math.pow(k,al)});
+    bev.push ({x:k, y:(dv+n+g)*k});
+  }
+  return { fk, sfk, bev };
+}
+
+/* ─── Custom annotation plugin ─── */
+const annotPlugin = {
+  id: 'solowAnnot',
+  afterDraw(chart) {
+    const { kstar } = chart._ss || {};
+    if (!kstar) return;
+    const { ctx, chartArea: { left, right, bottom }, scales: { x: sx, y: sy } } = chart;
+    const xpx   = sx.getPixelForValue(kstar);
+    const ystar  = Math.pow(kstar, al);
+    const sfkss  = s * ystar;              /* = (dng)*kstar at SS */
+    const ypx_f  = sy.getPixelForValue(ystar);
+    const ypx_sf = sy.getPixelForValue(sfkss);
+
+    ctx.save();
+
+    /* Vertical dashed green line at k* */
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = '#15803d';
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath(); ctx.moveTo(xpx, bottom); ctx.lineTo(xpx, ypx_f); ctx.stroke();
+
+    /* Horizontal dashed at y* (f(k*)) */
+    ctx.beginPath(); ctx.moveTo(left, ypx_f); ctx.lineTo(xpx, ypx_f); ctx.stroke();
+
+    /* Horizontal dashed at sf(k*) = intersection */
+    ctx.beginPath(); ctx.moveTo(left, ypx_sf); ctx.lineTo(xpx, ypx_sf); ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    /* Intersection dot */
+    ctx.fillStyle = '#15803d';
+    ctx.beginPath(); ctx.arc(xpx, ypx_sf, 5.5, 0, 2*Math.PI); ctx.fill();
+
+    /* k* label — inside chart just above x-axis */
+    ctx.fillStyle   = '#15803d';
+    ctx.font        = '500 12px DM Sans, system-ui, sans-serif';
+    ctx.textAlign   = 'center';
+    ctx.textBaseline= 'bottom';
+    ctx.fillText('k*', xpx, bottom - 4);
+
+    /* y* label — inside chart, left-aligned near y-axis */
+    ctx.textAlign   = 'left';
+    ctx.textBaseline= 'middle';
+    ctx.font        = '400 11px DM Sans, system-ui, sans-serif';
+    ctx.fillText('y*',    left + 5, ypx_f);
+    ctx.fillText('sf(k*)', left + 5, ypx_sf);
+
+    /* Convergence arrows along the bottom of the chart */
+    const ay   = bottom - 18;
+    const alen = 14;
+    const ahd  = 4;
+
+    function drawArrow(x0, dir) {
+      const x1 = x0 + dir * alen;
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x0, ay); ctx.lineTo(x1, ay); ctx.stroke();
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.moveTo(x1, ay);
+      ctx.lineTo(x1 - dir*ahd, ay - 3.5);
+      ctx.lineTo(x1 - dir*ahd, ay + 3.5);
+      ctx.closePath(); ctx.fill();
+    }
+
+    /* Left of k*: rightward arrows (k increasing) */
+    const lZone  = xpx - left - 24;
+    const nLeft  = Math.max(0, Math.floor(lZone / (alen + 20)));
+    if (nLeft > 0) {
+      const lStep = lZone / (nLeft + 1);
+      for (let i=1; i<=nLeft; i++) drawArrow(left + 12 + i*lStep - alen/2, 1);
+    }
+
+    /* Right of k*: leftward arrows (k decreasing) */
+    const rZone  = right - xpx - 24;
+    const nRight = Math.max(0, Math.floor(rZone / (alen + 20)));
+    if (nRight > 0) {
+      const rStep = rZone / (nRight + 1);
+      for (let i=1; i<=nRight; i++) drawArrow(xpx + 12 + i*rStep + alen/2, -1);
+    }
+
+    ctx.restore();
+  }
+};
+
+/* ─── Build initial chart ─── */
+const { kstar: k0 } = ss();
+const kMax0 = k0 * 2.5;
+const { fk: f0, sfk: sf0, bev: b0 } = mkData(kMax0);
+
+const chart = new Chart(document.getElementById('chart'), {
+  type: 'scatter',
+  plugins: [annotPlugin],
+  data: {
+    datasets: [
+      {
+        label: 'f(k)',  data: f0,
+        showLine: true, borderColor: '#94a3b8',
+        borderWidth: 2, pointRadius: 0, fill: false
+      },
+      {
+        label: 'sf(k)', data: sf0,
+        showLine: true, borderColor: '#1d4ed8',
+        borderWidth: 2.5, pointRadius: 0, fill: false
+      },
+      {
+        label: '(δ+n+g)k', data: b0,
+        showLine: true, borderColor: '#b91c1c',
+        borderWidth: 2, pointRadius: 0, fill: false
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 180 },
+    plugins: {
+      legend:  { display: false },
+      tooltip: { enabled: false }
+    },
+    scales: {
+      x: {
+        type: 'linear', min: 0, max: kMax0,
+        title: {
+          display: true,
+          text: 'k  (capital per effective worker)',
+          font: { size: 12, style: 'italic' },
+          color: '#374151', padding: { top: 8 }
+        },
+        ticks: { maxTicksLimit: 7, color: '#64748b', font: { size: 11 } },
+        grid:  { color: 'rgba(0,0,0,0.05)' }
+      },
+      y: {
+        type: 'linear', min: 0,
+        title: {
+          display: true,
+          text: 'output  /  investment  per  effective  worker',
+          font: { size: 12, style: 'italic' },
+          color: '#374151', padding: { bottom: 8 }
+        },
+        ticks: { maxTicksLimit: 6, color: '#64748b', font: { size: 11 } },
+        grid:  { color: 'rgba(0,0,0,0.05)' }
+      }
+    }
+  }
+});
+chart._ss = { kstar: k0 };
+
+/* ─── Update stats panel ─── */
+function updStats() {
+  const { kstar, ystar, cstar, dng } = ss();
+  document.getElementById('ssk').textContent   = kstar.toFixed(2);
+  document.getElementById('ssy').textContent   = ystar.toFixed(2);
+  document.getElementById('ssvc').textContent  = cstar.toFixed(2);
+  document.getElementById('ssdng').textContent = dng.toFixed(3);
+
+  const eps = 0.012;
+  let note;
+  if (Math.abs(s - al) < eps) {
+    note = '<span class="bdg bdg-at">Golden rule</span> s\u2009=\u2009\u03b1\u2009=\u2009' + al.toFixed(2)
+         + '. Steady-state consumption is at its maximum.';
+  } else if (s > al) {
+    note = '<span class="bdg bdg-ov">Overaccumulation</span> s\u2009=\u2009' + s.toFixed(2)
+         + '\u2009&gt;\u2009\u03b1\u2009=\u2009' + al.toFixed(2)
+         + '. Reducing <i>s</i> would raise c*.';
+  } else {
+    note = '<span class="bdg bdg-un">Underaccumulation</span> s\u2009=\u2009' + s.toFixed(2)
+         + '\u2009&lt;\u2009\u03b1\u2009=\u2009' + al.toFixed(2)
+         + '. Raising <i>s</i> would raise c*.';
+  }
+  document.getElementById('grnote').innerHTML =
+    '<b>Golden rule:</b> for Cobb–Douglas, s<sub>GR</sub>\u2009=\u2009\u03b1.<br>' + note;
+}
+
+/* ─── Main update (called on every slider move) ─── */
+function update() {
+  s  = +document.getElementById('sls').value;
+  al = +document.getElementById('sla').value;
+  dv = +document.getElementById('sld').value;
+  n  = +document.getElementById('sln').value;
+  g  = +document.getElementById('slg').value;
+
+  document.getElementById('vs').textContent = s.toFixed(2);
+  document.getElementById('va').textContent = al.toFixed(2);
+  document.getElementById('vd').textContent = dv.toFixed(2);
+  document.getElementById('vn').textContent = n.toFixed(3);
+  document.getElementById('vg').textContent = g.toFixed(3);
+
+  updStats();
+
+  const { kstar } = ss();
+  const kMax = Math.max(kstar * 2.5, 0.5);
+  const { fk, sfk, bev } = mkData(kMax);
+
+  chart.data.datasets[0].data = fk;
+  chart.data.datasets[1].data = sfk;
+  chart.data.datasets[2].data = bev;
+  chart.options.scales.x.max  = kMax;
+  chart._ss = { kstar };
+  chart.update();
+}
+
+/* ─── Attach listeners ─── */
+['sls','sla','sld','sln','slg'].forEach(id =>
+  document.getElementById(id).addEventListener('input', update)
+);
+
+/* ─── Init ─── */
+updStats();
+</script>
+</body>
+</html>
