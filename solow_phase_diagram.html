@@ -148,7 +148,15 @@ input[type="range"]::-moz-range-thumb {
 
   <div class="hd">
     <h1>Solow Growth Model — Phase Diagram</h1>
-    <p>Per effective worker &middot; Cobb–Douglas production: f(k) = k<sup>&alpha;</sup> &middot; adjust parameters with the sliders</p>
+    <p style="font-style:normal;font-size:.8rem;color:var(--muted);margin-top:4px;line-height:1.6">
+      This interactive diagram illustrates the steady-state analysis of the Solow growth model with
+      population growth (<i>n</i>) and technological progress (<i>g</i>). All variables are expressed
+      per effective worker. The blue curve shows actual investment <i>sf</i>(<i>k</i>); the red line
+      shows break-even investment (&delta;+<i>n</i>+<i>g</i>)<i>k</i>. Their intersection determines
+      the steady-state capital stock <i>k</i>*. Use the sliders to explore how changes in the savings
+      rate, capital share, depreciation, population growth, and technological progress shift the
+      steady state and affect long-run living standards.
+    </p>
   </div>
 
   <div class="grid">
@@ -241,9 +249,17 @@ input[type="range"]::-moz-range-thumb {
 
   </div>
 
-  <div class="foot">
-    Solow (1956) &middot; Assumes Cobb–Douglas f(k) = k<sup>&alpha;</sup> per effective worker.
-    Golden rule: for Cobb–Douglas, the consumption-maximizing savings rate is s<sub>GR</sub> = &alpha;.
+  <div class="foot" style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.5rem">
+    <span>
+      Based on Solow (1956) &middot; Cobb–Douglas f(k) = k<sup>&alpha;</sup> per effective worker &middot;
+      Golden rule: s<sub>GR</sub> = &alpha; for Cobb–Douglas.
+    </span>
+    <span style="white-space:nowrap">
+      Created by <a href="https://sites.google.com/view/abramov-vladislav/home"
+        style="color:#1d4ed8;text-decoration:none;font-style:normal"
+        target="_blank">Vladislav Abramov</a>,
+      Texas A&amp;M University.
+    </span>
   </div>
 
 </div>
